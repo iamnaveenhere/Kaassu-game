@@ -1,0 +1,119 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>XOXO Game</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>XOXO Game (Player vs CPU)</h1>
+  <div id="wallet">Wallet: 0 points</div>
+  <div class="board" id="board"></div>
+  <div id="result"></div>
+  <button id="restart">Restart Game</button>
+
+  <script src="script.js"></script>
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tic-Tac-Toe (Player vs CPU)</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Tic-Tac-Toe</h1>
+    <div id="wallet">Wallet: 0 points</div>
+    <div id="board" class="board"></div>
+    <div id="result" class="result"></div>
+    <button id="restart">Restart Game</button>
+  </div>
+
+  <script>
+    const board = document.getElementById("board");
+    const result = document.getElementById("result");
+    const walletDiv = document.getElementById("wallet");
+    const restartBtn = document.getElementById("restart");
+
+    let currentBoard = Array(9).fill("");
+    let gameOver = false;
+
+    function drawBoard() {
+      board.innerHTML = "";
+      currentBoard.forEach((symbol, i) => {
+        const cell = document.createElement("div");
+        cell.classList.add("cell");
+        cell.textContent = symbol;
+        cell.dataset.index = i;
+
+        if (!gameOver && symbol === "") {
+          cell.addEventListener("click", () => makeMove(i));
+        }
+
+        board.appendChild(cell);
+      });
+    }
+
+    function makeMove(index) {
+      if (gameOver) return;
+
+      fetch("/game/play", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ move: index })
+      })
+        .then(res => res.json())
+        .then(data => {
+          currentBoard = data.board;
+          drawBoard();
+
+          if (data.winner === "player") {
+            result.textContent = `You win! +${data.points} pts`;
+            gameOver = true;
+          } else if (data.winner === "cpu") {
+            result.textContent = `CPU wins!`;
+            gameOver = true;
+          } else if (data.winner === "draw") {
+            result.textContent = `Draw!`;
+            gameOver = true;
+          } else {
+            result.textContent = "";
+          }
+
+          if (data.wallet !== undefined) {
+            walletDiv.textContent = `Wallet: ${data.wallet} points`;
+          }
+        });
+    }
+
+    function restartGame() {
+      fetch("/game/restart", { method: "POST" })
+        .then(res => res.json())
+        .then(data => {
+          currentBoard = data.board;
+          gameOver = false;
+          result.textContent = "";
+          drawBoard();
+        });
+    }
+
+    restartBtn.addEventListener("click", restartGame);
+
+    window.addEventListener("DOMContentLoaded", () => {
+      fetch("/wallet")
+        .then(res => res.json())
+        .then(data => {
+          walletDiv.textContent = `Wallet: ${data.wallet} points`;
+        });
+
+      restartGame();
+    });
+  </script>
+</body>
+</html>
+
