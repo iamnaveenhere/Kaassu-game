@@ -391,7 +391,7 @@ app.post("/game/play", (req, res) => {
   // Player wins
   if (checkWinner(currentBoard, player)) {
     gameOver = true;
-    const points = Math.floor(Math.random() * 50);
+    const points = Math.floor(Math.random() * 50)+1;
     wallet += points;
     return res.json({ board: currentBoard, winner: "player", points, wallet });
   }
