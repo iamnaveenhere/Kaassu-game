@@ -288,7 +288,8 @@ import cors from "cors";
 import { fileURLToPath } from "url";
 
 const app = express();
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
+
 
 // ES module fix for __dirname
 const __filename = fileURLToPath(import.meta.url);
